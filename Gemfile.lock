@@ -1,0 +1,26 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    base64 (0.2.0)
+    dotenv (2.8.1)
+    faraday (2.8.1)
+      base64
+      faraday-net_http (>= 2.0, < 3.1)
+      ruby2_keywords (>= 0.0.4)
+    faraday-net_http (3.0.2)
+    ruby2_keywords (0.0.5)
+    tibber (0.1.0)
+      faraday
+      wrapi (>= 0.3.0)
+    wrapi (0.4.5)
+      faraday
+
+PLATFORMS
+  universal-darwin-23
+
+DEPENDENCIES
+  dotenv
+  tibber
+
+BUNDLED WITH
+   2.2.13
