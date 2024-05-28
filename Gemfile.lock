@@ -8,6 +8,8 @@ GEM
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
     faraday-net_http (3.0.2)
+    growatt (0.1.0)
+      wrapi (>= 0.3.0)
     ruby2_keywords (0.0.5)
     tibber (0.1.0)
       faraday
@@ -20,6 +22,7 @@ PLATFORMS
 
 DEPENDENCIES
   dotenv
+  growatt
   tibber
 
 BUNDLED WITH
