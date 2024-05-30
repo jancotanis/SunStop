@@ -31,8 +31,6 @@ class Scheduler
 
     # Sleep for that duration
     sleep seconds_until_next_hour
-
-    puts "Woke up at #{Time.now}"
   end
 
   # do we have negative prices at this moment?
@@ -55,18 +53,20 @@ class Inverter
 
     @client = Growatt.client
     @client.login
-    @inverter_serial = @client.inverter_list.first.deviceSn
-    @is_on = @client.inverter_on?(inverter_serial)
+    @inverter_serial = @client.inverter_list(@client.login_info['data'].first['plantId']).first.deviceSn
+    @is_on = @client.inverter_on?(@inverter_serial)
   end
   def is_on?
     @is_on
   end
   def turnon(on)
-    puts "Turning EV panels #{onoff(on)}"
-    if @client.turn_inverter(@inverter_serial,on)
-      @is_on = on
-    else
-      puts "Error Turning EV panels #{onoff(on)}"
+    if (@is_on != on)
+      puts "Turning EV panels #{onoff(on)}"
+      if @client.turn_inverter(@inverter_serial,on)
+        @is_on = on
+      else
+        puts "Error Turning EV panels #{onoff(on)}"
+      end
     end
   end
 
