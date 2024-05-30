@@ -1,4 +1,4 @@
-require 'yaml'
+require 'time'
 require 'dotenv/load'
 require 'logger'
 require 'growatt'
@@ -45,31 +45,37 @@ end
 def since_last_time(ev,pvout,inverter)
   now = Time.now
   if File.exist?(CONFIG)
-    last_time = Time.new(File.read(CONFIG))
+    last_time = Time.parse(File.read(CONFIG))
   else
     last_time = Time.new(now.year,1,1)
   end
   puts "- last run: #{last_time}"
   current_month = last_time
+  last_upload = current_month.strftime("%Y%m%d")
   while current_month <= now do
     yymm = current_month.strftime("%Y%m")
-    puts yymm
+    puts "- loading period #{yymm}"
     data = ev.inverter_data(inverter.deviceSn,Growatt::Timespan::MONTH,current_month)
 
+    output = {}
     data.attributes.keys.each do |day|
       date = "#{yymm}#{day.to_s.rjust(2,'0')}"
-      kwh = data[day] * 1000
-      puts "#{date},#{kwh}"
-      pvout.add_output(
-        :output_date      => date,
-        :energy_generated => kwh
-      )    
+      if date >= last_upload
+        kWh = data[day] * 1000
+        output[date] = {:energy_generated => kWh}
+      end
+    end
+    if output.keys.count > 0
+      puts "- uploading batch #{yymm}, with #{output.keys.count} records"
+      current_month = next_month(current_month)
+    else
+      puts "- nothing to upload"
     end
     current_month = next_month(current_month)
   end
-  
+
   File.open(CONFIG, 'w') do |file|
-    file.write(current_month)
+    file.write(now)
   end
 end
 
@@ -94,4 +100,3 @@ devices = ev.device_list(plant_id)
 inverter = devices.first
 
 since_last_time(ev,pvout,inverter)
-
