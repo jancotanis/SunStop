@@ -59,6 +59,7 @@ def since_last_time(ev,pvout,inverter)
 
     output = {}
     data.attributes.keys.each do |day|
+      # upload since last upload including remainder of that date
       date = "#{yymm}#{day.to_s.rjust(2,'0')}"
       if date >= last_upload
         kWh = data[day] * 1000
@@ -67,7 +68,7 @@ def since_last_time(ev,pvout,inverter)
     end
     if output.keys.count > 0
       puts "- uploading batch #{yymm}, with #{output.keys.count} records"
-      current_month = next_month(current_month)
+      pvout.add_batch_output(output)
     else
       puts "- nothing to upload"
     end
