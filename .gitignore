@@ -17,6 +17,7 @@
 .DS_Store
 __pycache__
 *.py
+*.cfg
 
 # Used by dotenv library to load environment variables.
 .env
