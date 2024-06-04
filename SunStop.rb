@@ -54,7 +54,17 @@ class Inverter
     @client = Growatt.client
     @client.login
     @inverter_serial = @client.inverter_list(@client.login_info['data'].first['plantId']).first.deviceSn
-    @is_on = @client.inverter_on?(@inverter_serial)
+    #@is_on = @client.inverter_on?(@inverter_serial)
+    control = @client.inverter_control_data(@inverter_serial)
+    if "0".eql? control.exportLimit
+      # disabled, full power
+      @is_on = true
+      puts "- Inverter is on"
+    else
+      # export limit enabled, return percentage
+      puts "- Inverter is limited (#{control.exportLimitPowerRate}%)"
+      @is_on = false
+    end
   end
   def is_on?
     @is_on
@@ -62,7 +72,13 @@ class Inverter
   def turnon(on)
     if (@is_on != on)
       puts "Turning EV panels #{onoff(on)}"
-      if @client.turn_inverter(@inverter_serial,on)
+      if on
+        result = @client.export_limit(@inverter_serial,Growatt::ExportLimit::DISABLE)
+      else
+        result = @client.export_limit(@inverter_serial,Growatt::ExportLimit::PERCENTAGE, 100)
+      end
+
+      if result
         @is_on = on
       else
         puts "Error Turning EV panels #{onoff(on)}"
@@ -76,6 +92,11 @@ class Inverter
 end
 
 
+puts "SunStop #{VERSION}"
+puts " Stops Growatt-inverter output if energy prices are subzero."
+puts " Use SunStop [n]"
+puts "  n is number of times to run or indefinately; checks once each hour."
+
 Tibber.configure do |config|
   config.access_token = ENV['TIBBER_ACCESS_TOKEN']
 end
@@ -83,7 +104,8 @@ end
 scheduler = Scheduler.new(Tibber.client)
 ev = Inverter.new
 
-puts "SunStop #{VERSION}"
+count = ARGV[1]
+count = count.to_i if count
 # endless loop
 loop do
   if scheduler.negative_prices?
@@ -94,4 +116,8 @@ loop do
     ev.turnon(true) unless ev.is_on?
   end
   scheduler.sleep_until_next_hour
+  if count
+    count = count - 1
+    return if count == 0
+  end
 end
