@@ -104,8 +104,11 @@ end
 scheduler = Scheduler.new(Tibber.client)
 ev = Inverter.new
 
-count = ARGV[1]
+
+count = ARGV[0]
 count = count.to_i if count
+puts "- Looping#{count} time(s)" if count
+
 # endless loop
 loop do
   if scheduler.negative_prices?
