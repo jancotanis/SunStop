@@ -113,16 +113,20 @@ end
 puts "- Looping #{count} time(s)\n"
 
 begin
-  count.times do
+  loop do
+    puts "Prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
     if scheduler.negative_prices?
-      puts "Stop EV panels, prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
       ev.turnon(false) if ev.is_on?
     else
-      puts "Start EV panels, prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
       ev.turnon(true) unless ev.is_on?
     end
-    scheduler.sleep_until_next_hour
+    count = count - 1
+    if count > 1
+      scheduler.sleep_until_next_hour
+    else
+      exit 0
+    end
   end
 rescue Interrupt
-  puts "* Aborting SunStop"
+  puts "\r* Aborting SunStop"
 end
