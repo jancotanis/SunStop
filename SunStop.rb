@@ -77,8 +77,8 @@ class Inverter
       else
         result = @client.export_limit(@inverter_serial,Growatt::ExportLimit::PERCENTAGE, 100)
       end
-
       if result
+        puts "EV panels are turned #{onoff(on)}"
         @is_on = on
       else
         puts "Error Turning EV panels #{onoff(on)}"
@@ -94,8 +94,8 @@ end
 
 puts "SunStop #{VERSION}"
 puts " Stops Growatt-inverter output if energy prices are subzero."
-puts " Use SunStop [n]"
-puts "  n is number of times to run or indefinately; checks once each hour."
+puts " Use SunStop [n=1]"
+puts " - n is number of times to run, default is once; checks once each hour."
 
 Tibber.configure do |config|
   config.access_token = ENV['TIBBER_ACCESS_TOKEN']
@@ -104,23 +104,25 @@ end
 scheduler = Scheduler.new(Tibber.client)
 ev = Inverter.new
 
+if ARGV[0]
+  count = ARGV[0].to_i
+else
+  count = 1
+end
 
-count = ARGV[0]
-count = count.to_i if count
-puts "- Looping#{count} time(s)" if count
+puts "- Looping #{count} time(s)\n"
 
-# endless loop
-loop do
-  if scheduler.negative_prices?
-    puts "Stop EV panels, prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
-    ev.turnon(false) if ev.is_on?
-  else
-    puts "Start EV panels, prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
-    ev.turnon(true) unless ev.is_on?
+begin
+  count.times do
+    if scheduler.negative_prices?
+      puts "Stop EV panels, prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
+      ev.turnon(false) if ev.is_on?
+    else
+      puts "Start EV panels, prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
+      ev.turnon(true) unless ev.is_on?
+    end
+    scheduler.sleep_until_next_hour
   end
-  scheduler.sleep_until_next_hour
-  if count
-    count = count - 1
-    return if count == 0
-  end
+rescue Interrupt
+  puts "* Aborting SunStop"
 end
