@@ -92,7 +92,7 @@ class Inverter
 end
 
 
-puts "SunStop #{VERSION}"
+puts "SunStop #{VERSION} #{Time.now}"
 puts " Stops Growatt-inverter output if energy prices are subzero."
 puts " Use SunStop [n=1]"
 puts " - n is number of times to run, default is once; checks once each hour."
