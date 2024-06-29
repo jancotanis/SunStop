@@ -14,13 +14,17 @@ end
 
 # Define a route for the status page
 get '/status' do
-  @files = Dir.glob("./*-cron.log")
+  #@files = Dir.glob("./*-cron.log")
   @price = Tools.current_price
   @inverter_on = ev.onoff(ev.is_on?)
   @inverter_prc = ev.control.exportLimitPowerRate
-  csv_data = CSV.read("./sunstop.csv", headers: true)
+  if File.exist?(CSV_LOG)
+    csv_data = CSV.read("./sunstop.csv", headers: true)
+    @logging = csv_data.each.to_a.last(10).reverse
+  else
+    @logging = []
+  end
   # Get the last 10 lines and reverse their order
-  @logging = csv_data.each.to_a.last(10).reverse
   erb :'status/index'
 end
 
