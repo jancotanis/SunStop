@@ -2,6 +2,7 @@ require 'dotenv/load'
 require 'tibber'
 require 'growatt'
 
+CSV_LOG = './sunstop.csv'
 
 Tibber.configure do |config|
   config.access_token = ENV['TIBBER_ACCESS_TOKEN']

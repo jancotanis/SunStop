@@ -3,7 +3,6 @@ require './setup'
 
 VERSION = '1.0'
 
-CSV_LOG = './sunstop.csv'
 
 class Scheduler
   attr_reader :client
