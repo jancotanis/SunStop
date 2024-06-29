@@ -1,6 +1,8 @@
 require './setup'
 
-VERSION = "1.0"
+VERSION = '1.0'
+
+CSV_LOG = './sunstop.csv'
 
 class Scheduler
   attr_reader :client
@@ -43,9 +45,11 @@ class Scheduler
 end
 
 def log(price,onoff)
+  headers = File.exist?(CSV_LOG)
   ts = Time.now.strftime('%Y-%m-%d-%H')
   # Open the file in append mode and write the timestamp
-  File.open('./sunstop.csv', 'a') do |file|
+  File.open(CSV_LOG, 'a') do |file|
+    file.puts 'timestamp,price,inverter_onoff' unless headers
     file.puts "#{ts},#{price},#{onoff}"
   end
 end
@@ -79,7 +83,7 @@ begin
       result = ev.turnon(true) unless ev.is_on?
     end
 
-    log(Tools.current_price.energy,ev.onoff(ev.is_on?)) #if result
+    log(Tools.current_price.energy,ev.onoff(ev.is_on?)) if result
 
     count = count - 1
     if count > 1
