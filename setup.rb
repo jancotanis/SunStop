@@ -43,6 +43,7 @@ attr_reader :control
     @is_on
   end
   def turnon(on)
+    result = false
     if (@is_on != on)
       puts "Turning EV panels #{onoff(on)}"
       if on
@@ -57,6 +58,7 @@ attr_reader :control
         puts "Error Turning EV panels #{onoff(on)}"
       end
     end
+    result
   end
 
   def onoff(on)

@@ -42,6 +42,14 @@ class Scheduler
   end
 end
 
+def log(price,onoff)
+  ts = Time.now.strftime('%Y-%m-%d-%H')
+  # Open the file in append mode and write the timestamp
+  File.open('./sunstop.csv', 'a') do |file|
+    file.puts "#{ts},#{price},#{onoff}"
+  end
+end
+
 
 
 puts "SunStop #{VERSION} #{Time.now}"
@@ -64,11 +72,15 @@ end
 begin
   loop do
     puts "Prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
+    result = false
     if scheduler.negative_prices?
-      ev.turnon(false) if ev.is_on?
+      result = ev.turnon(false) if ev.is_on?
     else
-      ev.turnon(true) unless ev.is_on?
+      result = ev.turnon(true) unless ev.is_on?
     end
+
+    log(Tools.current_price.energy,ev.onoff(ev.is_on?)) #if result
+
     count = count - 1
     if count > 1
       scheduler.sleep_until_next_hour
