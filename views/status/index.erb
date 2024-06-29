@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+<style>
+@import url('https://fonts.googleapis.com/css?family=Open+Sans');
+body {
+  margin: 0;
+  color: white;
+  background-color: #222222;
+  font-size: 20px;
+  font-family: 'Open Sans', "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+.dashboard {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 10px;
+  padding: 10px;
+}
+
+.widget {
+  background-color: #fff;
+  border-radius: 2px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  xpadding: 20px;
+  text-align: center;
+}
+
+h1 {
+  color: rgba(255, 255, 255, 0.8);
+  font-size: 16pt;
+}
+h2 {
+  color: rgba(255, 255, 255, 1.0);
+  font-weight: 700;
+  font-size: 76px;
+}
+p {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.widget h2 {
+    margin-top: 0;
+}
+
+.tibber {
+  background-color: #47bbb3;
+}
+.growatt {
+  background-color: #9c4274;
+}
+.widget3 {
+  background-color: #ff9618;
+  xgrid-column: 1 /span 2;
+}
+.widget4 {
+  background-color: #e82711;
+  xgrid-column: 1 /span 2;
+}
+
+</style>
+  </head>
+  <body>
+    <div class="dashboard">
+      <div class="widget tibber">
+        <h1>Tibber</h1>
+        <h2>&euro; <%= @price.energy %></h2>
+        <p>&euro; <%= @price.total %>/kWh including taxes</p>
+      </div>
+      <div class="widget growatt">
+        <h1>Growatt</h1>
+        <h2><%= @inverter_on %></h2>
+        <p>EV panels</p>
+      </div>
+      <div class="widget widget3">
+        <h1>SunStop events</h1>
+        <h2>SunStop</h2>
+        <table width="100%">
+         <tr><th align='left'>timestamp</th><th align='right'>price</th><th align='right'>state</th></tr>
+<%
+@logging.each do |row|
+%>
+          <tr>
+           <td align='left'><%=row['timestamp']%></td>
+           <td align='right'><%=row['price']%></td>
+           <td align='right'><%=row['state']%></td>
+          </tr>
+<%
+end
+%>
+        </table>
+      </div>
+      <div class="widget widget4">
+        <h1>&nbsp;</h1>
+        <h2>Widget 4</h2>
+        <p>Content for widget 4.</p>
+      </div>
+    </div>
+  </body>
+</html>
