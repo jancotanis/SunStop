@@ -72,7 +72,7 @@ def parse_options
     opts.on("-r", "--run HOURS", Float, "Run number of hours, once hour") do |price|
       options[:run] = price.to_i
     end
-    opts.on_tail("-h", "--help", "Show this message") do
+    opts.on_tail("-h", "-?","--help", "Show this message") do
       puts opts
       exit
     end
