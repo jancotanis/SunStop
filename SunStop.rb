@@ -1,3 +1,4 @@
+require 'optparse'
 require './setup'
 
 VERSION = '1.0'
@@ -34,9 +35,9 @@ class Scheduler
   end
 
   # do we have negative prices at this moment?
-  def negative_prices?
+  def negative_prices?(price)
     price_info = current_price
-    price_info.energy < 0
+    price_info.energy < price
   end
 
   def current_price
@@ -46,19 +47,44 @@ end
 
 def log(price,onoff)
   headers = File.exist?(CSV_LOG)
-  ts = Time.now.strftime('%Y-%m-%d-%H')
+  ts = Time.now.strftime('%Y-%m-%d %H:%M')
   # Open the file in append mode and write the timestamp
   File.open(CSV_LOG, 'a') do |file|
-    file.puts 'timestamp,price,inverter_onoff' unless headers
-    file.puts "#{ts},#{price},#{onoff}"
+    file.puts 'timestamp, price, state' unless headers
+    file.puts "#{ts}, #{price}, #{onoff}"
   end
 end
 
+def parse_options
+  options = {:cutoff_price => 0.0, :run => 1}
+
+  OptionParser.new do |opts|
+    opts.banner = "Usage: SunStop.rb [options]"
+
+    # Define a float option with a default value
+    opts.on("-p", "--price PRICE", Float, "Cutoff price in cents. Undert this value, invertor will be shutdown based on Tibber utility rates.") do |price|
+      if price
+        options[:cutoff_price] = price.to_f/100.0
+        puts " cutoff price is #{options[:cutoff_price]*100.0} cents"
+      else
+        puts "* cutoff price is not defined, using 0.0"
+      end
+    end
+    opts.on("-r", "--run HOURS", Float, "Run number of hours, once hour") do |price|
+      options[:run] = price.to_i
+    end
+    opts.on_tail("-h", "--help", "Show this message") do
+      puts opts
+      exit
+    end
+
+  end.parse!
+  options
+end
 
 
 puts "SunStop #{VERSION} #{Time.now}"
-puts "Stops Growatt-inverter output if energy prices are subzero."
-
+options = parse_options
 
 scheduler = Scheduler.new(Tibber.client)
 ev = Inverter.new
@@ -67,17 +93,13 @@ if ev.is_on?
 else
   puts "- Inverter is limited (#{ev.control.exportLimitPowerRate}%)"
 end
-if ARGV[0]
-  count = ARGV[0].to_i
-else
-  count = 1
-end
+
 
 begin
   loop do
     puts "Prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
     result = false
-    if scheduler.negative_prices?
+    if scheduler.negative_prices?(options[:cutoff_price])
       result = ev.turnon(false) if ev.is_on?
     else
       result = ev.turnon(true) unless ev.is_on?
@@ -85,8 +107,8 @@ begin
 
     log(Tools.current_price.energy,ev.onoff(ev.is_on?)) if result
 
-    count = count - 1
-    if count > 1
+    options[:run] = options[:run] - 1
+    if options[:run] > 1
       scheduler.sleep_until_next_hour
     else
       exit 0
