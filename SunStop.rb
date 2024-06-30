@@ -96,7 +96,7 @@ end
 
 begin
   loop do
-    puts "Prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}"
+    puts "Prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}, cuttoff at #{options[:cutoff_price]} #{scheduler.current_price.currency}"
     result = false
     if scheduler.negative_prices?(options[:cutoff_price])
       result = ev.turnon(false) if ev.is_on?
