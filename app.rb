@@ -2,6 +2,7 @@ require 'sinatra'
 require 'csv'
 require './setup'
 
+LAST_LOG = './sunstop-cron.log'
 
 set :port, 8080
 set :bind, '0.0.0.0'
@@ -14,7 +15,8 @@ end
 
 # Define a route for the status page
 get '/status' do
-  #@files = Dir.glob("./*-cron.log")
+  @last_run = ''
+  @last_run = File.read(LAST_LOG) if File.exist?(LAST_LOG)
   @price = Tools.current_price
   @inverter_on = ev.onoff(ev.is_on?)
   @inverter_prc = ev.control.exportLimitPowerRate

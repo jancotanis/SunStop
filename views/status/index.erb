@@ -60,7 +60,12 @@ p {
   background-color: #e82711;
   xgrid-column: 1 /span 2;
 }
-
+pre {
+  text-align: left;
+  font-size: 70%;
+  margin: 4px;
+  overflow: wrap;
+}
 </style>
   </head>
   <body>
@@ -78,6 +83,9 @@ p {
       <div class="widget widget3">
         <h1>SunStop events</h1>
         <h2>SunStop</h2>
+        <p>
+          <pre><%=@last_run%></pre>
+        </p>
         <table width="100%">
          <tr><th align='left'>timestamp</th><th align='right'>price</th><th align='right'>state</th></tr>
 <%
