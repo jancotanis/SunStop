@@ -6,8 +6,8 @@ After=network.target
 ExecStart=/usr/bin/ruby /home/user/SunStop/app.rb
 WorkingDirectory=/home/user/SunStop
 Restart=always
-User=user   # Replace with the user who should run the program
-Group=user  # Replace with the group for the user
+User=user
+Group=user
 
 [Install]
 WantedBy=multi-user.target
