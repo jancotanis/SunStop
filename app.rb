@@ -21,7 +21,7 @@ get '/status' do
   @inverter_on = ev.onoff(ev.is_on?)
   @inverter_prc = ev.control.exportLimitPowerRate
   if File.exist?(CSV_LOG)
-    csv_data = CSV.read("./sunstop.csv", headers: true)
+    csv_data = CSV.read("./sunstop.csv", headers: true, strip: true)
     @logging = csv_data.each.to_a.last(10).reverse
   else
     @logging = []
