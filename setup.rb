@@ -30,7 +30,14 @@ attr_reader :control
     @client = Growatt.client
     @client.login
     @inverter_serial = @client.inverter_list(@client.login_info['data'].first['plantId']).first.deviceSn
+    read_state
+  end
 
+  def is_on?
+    @is_on
+  end
+
+  def read_state
     @control = @client.inverter_control_data(@inverter_serial)
     if "0".eql? @control.exportLimit
       # disabled, full power
@@ -39,10 +46,9 @@ attr_reader :control
       # export limit enabled, return percentage
       @is_on = false
     end
-  end
-  def is_on?
     @is_on
   end
+
   def turnon(on)
     result = false
     if (@is_on != on)

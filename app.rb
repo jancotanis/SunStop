@@ -18,7 +18,7 @@ get '/status' do
   @last_run = ''
   @last_run = File.read(LAST_LOG) if File.exist?(LAST_LOG)
   @price = Tools.current_price
-  @inverter_on = ev.onoff(ev.is_on?)
+  @inverter_on = ev.onoff(ev.read_state)
   @inverter_prc = ev.control.exportLimitPowerRate
   if File.exist?(CSV_LOG)
     csv_data = CSV.read("./sunstop.csv", headers: true, strip: true)
