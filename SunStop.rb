@@ -1,7 +1,7 @@
 require 'optparse'
 require './setup'
 
-VERSION = '1.0'
+VERSION = '1.1'
 
 
 class Scheduler
@@ -55,19 +55,28 @@ def log(price,onoff)
 end
 
 def parse_options
-  options = {:cutoff_price => 0.0, :run => 1}
+  options = {:cutoff_price => 0.0, :run => 1, :limit => nil}
 
   OptionParser.new do |opts|
     opts.banner = "Usage: SunStop.rb [options]"
 
     # Define a float option with a default value
-    opts.on("-p", "--price PRICE", Float, "Cutoff price in cents. Undert this value, invertor will be shutdown based on Tibber utility rates.") do |price|
+    opts.on("-p", "--price PRICE", Float, "Cutoff price in cents. ", "Under this value, invertor will be shutdown based on Tibber utility rates.","Default is 0 cent.") do |price|
       if price
         options[:cutoff_price] = price.to_f/100.0
         puts " cutoff price is #{options[:cutoff_price]*100.0} cents"
       else
         puts "* cutoff price is not defined, using 0.0"
       end
+    end
+    opts.on("-l", "--limit WATTS", Float, "Limit export to max of WATTS watt when negative prices.","Default is 100% shutdown.") do |watts|
+      if watts
+        options[:limit] = watts.to_i
+        puts " invertor export limit set to #{options[:limit]}w"
+      else
+        puts "* limiting invertor export 100%"
+      end
+      exit
     end
     opts.on("-r", "--run HOURS", Float, "Run number of hours, once hour") do |price|
       options[:run] = price.to_i
@@ -99,7 +108,7 @@ begin
     puts "Prices are #{scheduler.current_price.energy} #{scheduler.current_price.currency}, cuttoff at #{options[:cutoff_price]} #{scheduler.current_price.currency}"
     result = false
     if scheduler.negative_prices?(options[:cutoff_price])
-      result = ev.turnon(false) if ev.is_on?
+      result = ev.turnon(false, options[:limit]) if ev.is_on?
     else
       result = ev.turnon(true) unless ev.is_on?
     end

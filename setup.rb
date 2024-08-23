@@ -49,14 +49,18 @@ attr_reader :control
     @is_on
   end
 
-  def turnon(on)
+  def turnon(on, limit=nil)
     result = false
     if (@is_on != on)
       puts "Turning EV panels #{onoff(on)}"
       if on
         result = @client.export_limit(@inverter_serial,Growatt::ExportLimit::DISABLE)
       else
-        result = @client.export_limit(@inverter_serial,Growatt::ExportLimit::PERCENTAGE, 100)
+        if limit
+          result = @client.export_limit(@inverter_serial,Growatt::ExportLimit::WATT, limit)
+        else
+          result = @client.export_limit(@inverter_serial,Growatt::ExportLimit::PERCENTAGE, 100)
+        end
       end
       if result
         puts "EV panels are turned #{onoff(on)}"
