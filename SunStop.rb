@@ -64,19 +64,18 @@ def parse_options
     opts.on("-p", "--price PRICE", Float, "Cutoff price in cents. ", "Under this value, invertor will be shutdown based on Tibber utility rates.","Default is 0 cent.") do |price|
       if price
         options[:cutoff_price] = price.to_f/100.0
-        puts " cutoff price is #{options[:cutoff_price]*100.0} cents"
+        puts " cutoff price option set to #{options[:cutoff_price]*100.0} cents"
       else
-        puts "* cutoff price is not defined, using 0.0"
+        puts "* cutoff price option is not defined, using 0.0"
       end
     end
     opts.on("-l", "--limit WATTS", Float, "Limit export to max of WATTS watt when negative prices.","Default is 100% shutdown.") do |watts|
       if watts
         options[:limit] = watts.to_i
-        puts " invertor export limit set to #{options[:limit]}w"
+        puts " export limit option set to #{options[:limit]}w"
       else
-        puts "* limiting invertor export 100%"
+        puts "* limiting export option to 100%"
       end
-      exit
     end
     opts.on("-r", "--run HOURS", Float, "Run number of hours, once hour") do |price|
       options[:run] = price.to_i
@@ -89,7 +88,6 @@ def parse_options
   end.parse!
   options
 end
-
 
 puts "SunStop #{VERSION} #{Time.now}"
 options = parse_options
