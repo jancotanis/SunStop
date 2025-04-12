@@ -67,6 +67,7 @@ pre {
   overflow: wrap;
 }
 </style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   </head>
   <body>
     <div class="dashboard">
@@ -74,11 +75,6 @@ pre {
         <h1>Tibber</h1>
         <h2>&euro; <%= @price.energy %></h2>
         <p>&euro; <%= @price.total %>/kWh including taxes</p>
-      </div>
-      <div class="widget growatt">
-        <h1>Growatt</h1>
-        <h2><%= @inverter_on %></h2>
-        <p>EV panels</p>
       </div>
       <div class="widget widget3">
         <h1>SunStop events</h1>
@@ -101,10 +97,73 @@ end
 %>
         </table>
       </div>
-      <div class="widget widget4">
-        <h1>&nbsp;</h1>
-        <h2>Widget 4</h2>
-        <p>Content for widget 4.</p>
+      <div class="widget widget4"><h1>Daily Prices</h1>
+      <canvas id="priceChart" width="400" height="400"></canvas>
+      <script>
+        const priceData = <%= @prices.to_json %>;
+
+        const labels = priceData.map(p => {
+          const date = new Date(p.startsAt);
+          return date.getHours().toString().padStart(2, '0') + ':00';
+        });
+
+        const energyPrices = priceData.map(p => p.energy*100);
+        const totalPrices = priceData.map(p => p.total*100);
+
+        const ctx = document.getElementById('priceChart').getContext('2d');
+        const priceChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [
+              {
+                label: 'Energy (€)',
+                data: energyPrices,
+                backgroundColor: 'rgba(255, 255, 255, 0.2)',
+                borderColor: 'rgba(255, 255, 255, 0.9)',
+                borderWidth: 2,
+                tension: 0.3,
+              },
+              {
+                label: 'Total (€)',
+                data: totalPrices,
+                backgroundColor: 'rgba(255, 150, 0, 0.2)',
+                borderColor: 'rgba(255, 150, 0, 1)',
+                borderWidth: 2,
+                tension: 0.3,
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: false,
+                ticks: {
+                  color: 'white'
+                }
+              },
+              x: {
+                ticks: {
+                  color: 'white'
+                }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: {
+                  color: 'white'
+                }
+              }
+            }
+          }
+        });
+      </script>
+      </div>
+      <div class="widget growatt">
+        <h1>Growatt</h1>
+        <h2><%= @inverter_on %></h2>
+        <p>EV panels</p>
       </div>
     </div>
   </body>

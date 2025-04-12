@@ -21,6 +21,13 @@ end
 # Provides utility functions related to Tibber price data.
 class Tools
   @@prices = {}
+  def self.prices
+    cache_id = Time.now.strftime '%Y-%m-%d-%H'
+    # Retrieve cached price or fetch new price from Tibber
+    prices = @@prices[cache_id] || Tibber.client.price_info.homes.first.currentSubscription.priceInfo.today
+    @@prices = {cache_id => prices}  # Update cache
+    prices
+  end
 
   # Retrieves the current electricity price from Tibber.
   # Prices are cached for one hour to minimize API calls.
@@ -30,10 +37,6 @@ class Tools
   # @example Get the current price
   #   Tools.current_price  # => 0.15 (example price)
   def self.current_price
-    cache_id = Time.now.strftime '%Y-%m-%d-%H'
-    # Retrieve cached price or fetch new price from Tibber
-    prices = @@prices[cache_id] || Tibber.client.price_info.homes.first.currentSubscription.priceInfo.today
-    @@prices = {cache_id => prices}  # Update cache
     prices[Time.now.hour]
   end
 end

@@ -17,6 +17,7 @@ end
 get '/status' do
   @last_run = ''
   @last_run = File.read(LAST_LOG) if File.exist?(LAST_LOG)
+  @prices = Tools.prices
   @price = Tools.current_price
   if File.exist?(CSV_LOG)
     csv_data = CSV.read("./sunstop.csv", headers: true, strip: true)
